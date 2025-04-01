@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { BabyInfoForm } from "@/components/BabyInfoForm";
 import { GrowthChart } from "@/components/GrowthChart";
 import { WeightEntryForm } from "@/components/WeightEntryForm";
@@ -6,34 +6,36 @@ import { EntriesTable } from "@/components/EntriesTable";
 import { EditEntryModal } from "@/components/EditEntryModal";
 import { GrowthSummary } from "@/components/GrowthSummary";
 import { Baby, WeightEntry } from "@shared/schema";
-import { useQuery } from "@tanstack/react-query";
-import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Separator } from "@/components/ui/separator";
 import { Baby as BabyIcon } from "lucide-react";
+import { useBabyData, useWeightEntries } from "@/hooks/useBaby";
+import * as storageService from "@/services/storageService";
 
 export default function Home() {
-  const [babyData, setBabyData] = useState<Baby | null>(null);
+  const { baby: babyData, createBaby } = useBabyData();
   const [editingEntry, setEditingEntry] = useState<WeightEntry | null>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDeletingEntry, setIsDeletingEntry] = useState<number | null>(null);
   const { toast } = useToast();
   
-  // Fetch weight entries if baby data exists
-  const { data: entries = [] } = useQuery({
-    queryKey: babyData ? [`/api/weight-entries/${babyData.id}`] : [],
-    enabled: !!babyData,
-  });
+  // Use weight entries hook to fetch and manage entries
+  const { 
+    entries = [], 
+    refreshEntries,
+    deleteWeightEntry 
+  } = useWeightEntries(babyData?.id || null);
   
   // Handler for baby info form submission
   const handleBabyInfoSubmit = (baby: Baby, birthWeightEntry: WeightEntry) => {
-    setBabyData(baby);
+    // Use the baby data directly from the hook
+    refreshEntries();
   };
   
   // Handler for entry addition
   const handleEntryAdded = () => {
-    // Additional actions after entry is added
+    refreshEntries();
   };
   
   // Handler for editing an entry
@@ -46,6 +48,7 @@ export default function Home() {
   const handleCloseEditModal = () => {
     setIsEditModalOpen(false);
     setEditingEntry(null);
+    refreshEntries();
   };
   
   // Handler for deleting an entry
@@ -54,20 +57,17 @@ export default function Home() {
   };
   
   // Handler for confirming deletion
-  const handleConfirmDelete = async () => {
+  const handleConfirmDelete = () => {
     if (isDeletingEntry) {
       try {
-        await apiRequest("DELETE", `/api/weight-entries/${isDeletingEntry}`);
+        deleteWeightEntry(isDeletingEntry);
         
         toast({
           title: "Measurement deleted",
           description: "The measurement has been deleted successfully."
         });
         
-        // Invalidate queries to refresh data
-        if (babyData) {
-          queryClient.invalidateQueries({ queryKey: [`/api/weight-entries/${babyData.id}`] });
-        }
+        refreshEntries();
       } catch (error) {
         console.error("Error deleting measurement:", error);
         toast({

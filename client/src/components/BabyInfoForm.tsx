@@ -15,8 +15,9 @@ import { babyFormSchema, BabyFormValues } from "@shared/schema";
 import { Button } from "@/components/ui/button";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useToast } from "@/hooks/use-toast";
-import { apiRequest } from "@/lib/queryClient";
 import { Baby, WeightEntry } from "@shared/schema";
+import * as storageService from "@/services/storageService";
+import { calculatePercentile } from "@/lib/utils";
 
 interface BabyInfoFormProps {
   onSubmit: (baby: Baby, birthWeightEntry: WeightEntry) => void;
@@ -35,15 +36,28 @@ export function BabyInfoForm({ onSubmit }: BabyInfoFormProps) {
     },
   });
 
-  async function handleSubmit(values: BabyFormValues) {
+  function handleSubmit(values: BabyFormValues) {
     try {
-      const res = await apiRequest("POST", "/api/baby", values);
-      const baby = await res.json();
+      // Convert number values to strings for storage
+      const babyData = {
+        ...values,
+        birthWeight: String(values.birthWeight)
+      };
+      
+      // Create the baby in local storage
+      const baby = storageService.createBaby(babyData);
       
       // Get the birth weight entry
-      const entriesRes = await apiRequest("GET", `/api/weight-entries/${baby.id}`);
-      const entries = await entriesRes.json();
-      const birthWeightEntry = entries[0];
+      const entries = storageService.getWeightEntriesByBabyId(baby.id);
+      let birthWeightEntry = entries[0];
+      
+      // Calculate and update percentile for the birth weight entry
+      if (birthWeightEntry) {
+        const percentile = calculatePercentile(0, Number(values.birthWeight), values.gender);
+        birthWeightEntry = storageService.updateWeightEntry(birthWeightEntry.id, {
+          percentile: String(percentile)
+        });
+      }
       
       toast({
         title: "Baby information saved",

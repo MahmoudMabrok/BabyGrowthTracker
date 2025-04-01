@@ -20,8 +20,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { weightEntryFormSchema, WeightEntryFormValues, Baby, WeightEntry } from "@shared/schema";
 import { useToast } from "@/hooks/use-toast";
-import { apiRequest, queryClient } from "@/lib/queryClient";
-import { calculateAgeInMonths } from "@/lib/utils";
+import { calculateAgeInMonths, calculatePercentile } from "@/lib/utils";
+import * as storageService from "@/services/storageService";
 
 interface EditEntryModalProps {
   baby: Baby;
@@ -51,17 +51,22 @@ export function EditEntryModal({ baby, entry, isOpen, onClose }: EditEntryModalP
     }
   }, [entry, form]);
 
-  async function handleSubmit(values: WeightEntryFormValues) {
+  function handleSubmit(values: WeightEntryFormValues) {
     if (!entry) return;
     
     try {
       // Calculate age in months based on birth date and measurement date
       const ageMonths = calculateAgeInMonths(baby.birthDate, values.date);
       
-      // Send the data to the API
-      await apiRequest("PUT", `/api/weight-entries/${entry.id}`, {
-        ...values,
-        ageMonths: ageMonths
+      // Calculate percentile
+      const percentile = calculatePercentile(ageMonths, Number(values.weight), baby.gender);
+      
+      // Update the data in localStorage
+      storageService.updateWeightEntry(entry.id, {
+        date: values.date,
+        weight: String(values.weight),
+        ageMonths: String(ageMonths),
+        percentile: String(percentile)
       });
       
       // Show success message
@@ -69,9 +74,6 @@ export function EditEntryModal({ baby, entry, isOpen, onClose }: EditEntryModalP
         title: "Measurement updated",
         description: "The measurement has been updated successfully."
       });
-      
-      // Invalidate queries to refresh data
-      queryClient.invalidateQueries({ queryKey: [`/api/weight-entries/${baby.id}`] });
       
       // Close modal
       onClose();

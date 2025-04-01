@@ -1,5 +1,5 @@
 modules = ["nodejs-20", "web", "postgresql-16"]
-run = "npx vite --config client-standalone.js"
+run = "npx vite --config vite-client.config.js"
 hidden = [".config", ".git", "generated-icon.png", "node_modules", "dist"]
 
 [nix]
@@ -38,5 +38,5 @@ task = "packager.installForAll"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "npx vite --config client-standalone.js"
+args = "npx vite --config vite-client.config.js"
 waitForPort = 5000

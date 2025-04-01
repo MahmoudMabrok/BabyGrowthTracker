@@ -15,8 +15,8 @@ import { weightEntryFormSchema, WeightEntryFormValues, Baby } from "@shared/sche
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { apiRequest, queryClient } from "@/lib/queryClient";
-import { calculateAgeInMonths } from "@/lib/utils";
+import { calculateAgeInMonths, calculatePercentile } from "@/lib/utils";
+import * as storageService from "@/services/storageService";
 
 interface WeightEntryFormProps {
   baby: Baby;
@@ -34,16 +34,21 @@ export function WeightEntryForm({ baby, onEntryAdded }: WeightEntryFormProps) {
     },
   });
 
-  async function handleSubmit(values: WeightEntryFormValues) {
+  function handleSubmit(values: WeightEntryFormValues) {
     try {
       // Calculate age in months based on birth date and measurement date
       const ageMonths = calculateAgeInMonths(baby.birthDate, values.date);
       
-      // Send the data to the API
-      const res = await apiRequest("POST", "/api/weight-entries", {
-        ...values,
+      // Calculate percentile
+      const percentile = calculatePercentile(ageMonths, Number(values.weight), baby.gender);
+      
+      // Store the data in localStorage
+      storageService.createWeightEntry({
         babyId: baby.id,
-        ageMonths: ageMonths
+        date: values.date,
+        weight: String(values.weight),
+        ageMonths: String(ageMonths),
+        percentile: String(percentile)
       });
       
       // Show success message
@@ -57,9 +62,6 @@ export function WeightEntryForm({ baby, onEntryAdded }: WeightEntryFormProps) {
         date: new Date().toISOString().split('T')[0],
         weight: undefined,
       });
-      
-      // Invalidate queries to refresh data
-      queryClient.invalidateQueries({ queryKey: [`/api/weight-entries/${baby.id}`] });
       
       // Notify parent that entry was added
       onEntryAdded();
