@@ -34,22 +34,37 @@ export const insertBabySchema = createInsertSchema(babies).omit({
 export type InsertBaby = z.infer<typeof insertBabySchema>;
 export type Baby = typeof babies.$inferSelect;
 
-// Weight entries schema
-export const weightEntries = pgTable("weightEntries", {
+// Measurement entries schema (both weight and height)
+export const measurementEntries = pgTable("measurementEntries", {
   id: serial("id").primaryKey(),
   babyId: serial("babyId").references(() => babies.id),
   date: text("date").notNull(),
   ageMonths: numeric("ageMonths").notNull(),
-  weight: numeric("weight").notNull(),
-  percentile: numeric("percentile"),
+  weight: numeric("weight"),
+  weightPercentile: numeric("weightPercentile"),
+  height: numeric("height"),
+  heightPercentile: numeric("heightPercentile"),
+  notes: text("notes"),
 });
 
-export const insertWeightEntrySchema = createInsertSchema(weightEntries).omit({
+export const insertMeasurementEntrySchema = createInsertSchema(measurementEntries).omit({
   id: true,
 });
 
-export type InsertWeightEntry = z.infer<typeof insertWeightEntrySchema>;
-export type WeightEntry = typeof weightEntries.$inferSelect;
+export type InsertMeasurementEntry = z.infer<typeof insertMeasurementEntrySchema>;
+export type MeasurementEntry = typeof measurementEntries.$inferSelect;
+
+// For backward compatibility
+export const weightEntries = measurementEntries;
+
+// Extended WeightEntry types for backward compatibility
+export type WeightEntry = MeasurementEntry & {
+  percentile?: string;
+};
+
+export type InsertWeightEntry = Omit<InsertMeasurementEntry, 'id'> & {
+  percentile?: string;
+};
 
 // Extended validation schemas for frontend forms
 export const babyFormSchema = insertBabySchema.extend({
@@ -63,12 +78,22 @@ export const babyFormSchema = insertBabySchema.extend({
   }),
 });
 
-export const weightEntryFormSchema = z.object({
+export const measurementEntryFormSchema = z.object({
   date: z.string().min(1, "Date is required"),
   weight: z.coerce.number()
     .min(0.5, "Weight must be at least 0.5 kg")
-    .max(30, "Weight must be less than 30 kg"),
+    .max(30, "Weight must be less than 30 kg")
+    .optional(),
+  height: z.coerce.number()
+    .min(30, "Height must be at least 30 cm")
+    .max(200, "Height must be less than 200 cm")
+    .optional(),
+  notes: z.string().optional()
 });
 
+// For backward compatibility
+export const weightEntryFormSchema = measurementEntryFormSchema;
+
 export type BabyFormValues = z.infer<typeof babyFormSchema>;
-export type WeightEntryFormValues = z.infer<typeof weightEntryFormSchema>;
+export type MeasurementEntryFormValues = z.infer<typeof measurementEntryFormSchema>;
+export type WeightEntryFormValues = MeasurementEntryFormValues;

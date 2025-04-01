@@ -1,23 +1,39 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { BabyInfoForm } from "@/components/BabyInfoForm";
 import { GrowthChart } from "@/components/GrowthChart";
 import { WeightEntryForm } from "@/components/WeightEntryForm";
 import { EntriesTable } from "@/components/EntriesTable";
 import { EditEntryModal } from "@/components/EditEntryModal";
 import { GrowthSummary } from "@/components/GrowthSummary";
-import { Baby, WeightEntry } from "@shared/schema";
+import { BabySelector } from "@/components/BabySelector";
+import { Baby, MeasurementEntry } from "@shared/schema";
 import { useToast } from "@/hooks/use-toast";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
-import { Separator } from "@/components/ui/separator";
-import { Baby as BabyIcon } from "lucide-react";
+import { Baby as BabyIcon, Download } from "lucide-react";
 import { useBabyData, useWeightEntries } from "@/hooks/useBaby";
-import * as storageService from "@/services/storageService";
+import {
+  TooltipProvider,
+  Tooltip,
+  TooltipTrigger,
+  TooltipContent,
+} from "@/components/ui/tooltip";
+import { Button } from "@/components/ui/button";
 
 export default function Home() {
-  const { baby: babyData, createBaby } = useBabyData();
-  const [editingEntry, setEditingEntry] = useState<WeightEntry | null>(null);
+  // State management
+  const { 
+    allBabies, 
+    activeBaby, 
+    isLoading, 
+    createBaby, 
+    deleteBaby, 
+    setActive 
+  } = useBabyData();
+  
+  const [editingEntry, setEditingEntry] = useState<MeasurementEntry | null>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDeletingEntry, setIsDeletingEntry] = useState<number | null>(null);
+  const [isAddingNewBaby, setIsAddingNewBaby] = useState(false);
   const { toast } = useToast();
   
   // Use weight entries hook to fetch and manage entries
@@ -25,12 +41,12 @@ export default function Home() {
     entries = [], 
     refreshEntries,
     deleteWeightEntry 
-  } = useWeightEntries(babyData?.id || null);
+  } = useWeightEntries(activeBaby?.id || null);
   
   // Handler for baby info form submission
-  const handleBabyInfoSubmit = (baby: Baby, birthWeightEntry: WeightEntry) => {
-    // Use the baby data directly from the hook
+  const handleBabyInfoSubmit = (baby: Baby) => {
     refreshEntries();
+    setIsAddingNewBaby(false);
   };
   
   // Handler for entry addition
@@ -39,7 +55,7 @@ export default function Home() {
   };
   
   // Handler for editing an entry
-  const handleEditEntry = (entry: WeightEntry) => {
+  const handleEditEntry = (entry: MeasurementEntry) => {
     setEditingEntry(entry);
     setIsEditModalOpen(true);
   };
@@ -86,6 +102,81 @@ export default function Home() {
     setIsDeletingEntry(null);
   };
   
+  // Handler for baby selector
+  const handleSelectBaby = (baby: Baby) => {
+    setActive(baby);
+  };
+  
+  // Handler for adding new baby
+  const handleAddNewBaby = () => {
+    setIsAddingNewBaby(true);
+  };
+  
+  // Handler for deleting a baby
+  const handleDeleteBaby = (babyId: number) => {
+    try {
+      deleteBaby(babyId);
+      toast({
+        title: "Child profile deleted",
+        description: "The child profile has been deleted successfully."
+      });
+    } catch (error) {
+      console.error("Error deleting baby:", error);
+      toast({
+        title: "Error",
+        description: "Failed to delete child profile. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+  
+  // Export data handler
+  const handleExportData = () => {
+    if (!activeBaby) return;
+    
+    try {
+      const exportData = {
+        baby: activeBaby,
+        measurements: entries
+      };
+      
+      // Create and download the file
+      const dataStr = JSON.stringify(exportData, null, 2);
+      const dataUri = "data:application/json;charset=utf-8," + encodeURIComponent(dataStr);
+      
+      const exportFileDefaultName = `${activeBaby.name.replace(/\s+/g, '_')}_growth_data.json`;
+      
+      const linkElement = document.createElement('a');
+      linkElement.setAttribute('href', dataUri);
+      linkElement.setAttribute('download', exportFileDefaultName);
+      linkElement.click();
+      
+      toast({
+        title: "Data exported",
+        description: `Growth data for ${activeBaby.name} has been exported.`
+      });
+    } catch (error) {
+      console.error("Error exporting data:", error);
+      toast({
+        title: "Export failed",
+        description: "Failed to export data. Please try again.",
+        variant: "destructive"
+      });
+    }
+  };
+  
+  // Loading state
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+          <p className="mt-4 text-muted-foreground">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+  
   return (
     <div className="min-h-screen bg-background">
       <header className="bg-card shadow-sm">
@@ -94,25 +185,54 @@ export default function Home() {
             <h1 className="text-2xl font-bold text-primary flex items-center">
               <BabyIcon className="mr-2 h-6 w-6" /> Baby Growth Tracker
             </h1>
+            
+            <div className="flex items-center space-x-2">
+              {activeBaby && (
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button 
+                        variant="outline" 
+                        size="icon"
+                        onClick={handleExportData}
+                      >
+                        <Download className="h-4 w-4" />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Export growth data</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              )}
+              
+              <BabySelector
+                babies={allBabies}
+                activeBaby={activeBaby}
+                onSelectBaby={handleSelectBaby}
+                onAddNewBaby={handleAddNewBaby}
+                onDeleteBaby={handleDeleteBaby}
+              />
+            </div>
           </div>
         </div>
       </header>
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {!babyData ? (
+        {(!activeBaby || isAddingNewBaby) ? (
           <BabyInfoForm onSubmit={handleBabyInfoSubmit} />
         ) : (
           <div>
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
               <div className="lg:col-span-2">
-                <GrowthChart baby={babyData} entries={entries} />
+                <GrowthChart baby={activeBaby} entries={entries} />
               </div>
               
               <div className="lg:col-span-1">
-                <WeightEntryForm baby={babyData} onEntryAdded={handleEntryAdded} />
+                <WeightEntryForm baby={activeBaby} onEntryAdded={handleEntryAdded} />
                 <div className="mt-8">
                   <EntriesTable 
-                    baby={babyData} 
+                    baby={activeBaby} 
                     entries={entries} 
                     onEdit={handleEditEntry}
                     onDelete={handleDeleteEntry}
@@ -121,7 +241,7 @@ export default function Home() {
               </div>
             </div>
             
-            <GrowthSummary baby={babyData} entries={entries} />
+            <GrowthSummary baby={activeBaby} entries={entries} />
           </div>
         )}
       </main>
@@ -135,12 +255,14 @@ export default function Home() {
       </footer>
       
       {/* Edit modal */}
-      <EditEntryModal
-        baby={babyData!}
-        entry={editingEntry}
-        isOpen={isEditModalOpen}
-        onClose={handleCloseEditModal}
-      />
+      {activeBaby && editingEntry && (
+        <EditEntryModal
+          baby={activeBaby}
+          entry={editingEntry}
+          isOpen={isEditModalOpen}
+          onClose={handleCloseEditModal}
+        />
+      )}
       
       {/* Delete confirmation dialog */}
       <AlertDialog open={isDeletingEntry !== null} onOpenChange={handleCancelDelete}>

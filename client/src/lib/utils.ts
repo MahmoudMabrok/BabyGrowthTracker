@@ -1,6 +1,7 @@
 import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
 import { getInterpolatedPercentile } from "./whoData";
+import { getInterpolatedHeightPercentile } from "./whoHeightData";
 import { format } from 'date-fns';
 
 export function cn(...inputs: ClassValue[]) {
@@ -63,9 +64,14 @@ export function formatAge(ageMonths: number): string {
   }
 }
 
-// Calculate percentile based on WHO growth data
+// Calculate weight percentile based on WHO growth data
 export function calculatePercentile(ageMonths: number, weight: number, gender: string): number {
   return Math.round(getInterpolatedPercentile(ageMonths, weight, gender));
+}
+
+// Calculate height percentile based on WHO growth data
+export function calculateHeightPercentile(ageMonths: number, height: number, gender: string): number {
+  return Math.round(getInterpolatedHeightPercentile(ageMonths, height, gender));
 }
 
 // Get percentile range description
@@ -87,7 +93,7 @@ export function getPercentileColor(percentile: number): string {
   return "text-destructive bg-destructive/10";
 }
 
-// Get status text based on percentile
+// Get status text based on weight percentile
 export function getPercentileStatus(percentile: number): string {
   if (percentile < 3) return "Low weight";
   if (percentile < 15) return "Slightly underweight";
@@ -96,7 +102,26 @@ export function getPercentileStatus(percentile: number): string {
   return "High weight";
 }
 
+// Get status text based on height percentile
+export function getHeightPercentileStatus(percentile: number): string {
+  if (percentile < 3) return "Short stature";
+  if (percentile < 15) return "Below average height";
+  if (percentile < 85) return "Average height";
+  if (percentile < 97) return "Above average height";
+  return "Tall stature";
+}
+
 // Format weight with 2 decimal places
 export function formatWeight(weight: number): string {
   return weight.toFixed(2);
+}
+
+// Format height with 1 decimal place
+export function formatHeight(height: number): string {
+  return height.toFixed(1);
+}
+
+// Convert height from cm to formatted display
+export function formatHeightDisplay(heightCm: number): string {
+  return `${heightCm} cm`;
 }

@@ -1,42 +1,152 @@
-import React from "react";
-import { Card, CardContent } from "@/components/ui/card";
+import React, { useState } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Baby, WeightEntry } from "@shared/schema";
-import { formatDate, formatAge, getPercentileColor } from "@/lib/utils";
-import { Pencil, Trash2 } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Baby, MeasurementEntry } from "@shared/schema";
+import { formatDate, formatAge, getPercentileColor, formatHeightDisplay } from "@/lib/utils";
+import { Pencil, Trash2, Scale, Ruler, FileText, Info } from "lucide-react";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface EntriesTableProps {
   baby: Baby;
-  entries: WeightEntry[];
-  onEdit: (entry: WeightEntry) => void;
+  entries: MeasurementEntry[];
+  onEdit: (entry: MeasurementEntry) => void;
   onDelete: (entryId: number) => void;
 }
 
 export function EntriesTable({ baby, entries, onEdit, onDelete }: EntriesTableProps) {
+  const [activeTab, setActiveTab] = useState<string>("all");
+  
+  const renderEntryWeight = (entry: MeasurementEntry) => {
+    if (!entry.weight) return "-";
+    return `${Number(entry.weight).toFixed(2)} kg`;
+  };
+  
+  const renderEntryHeight = (entry: MeasurementEntry) => {
+    if (!entry.height) return "-";
+    return `${Number(entry.height).toFixed(1)} cm`;
+  };
+  
+  const renderWeightPercentile = (entry: MeasurementEntry) => {
+    if (!entry.weightPercentile) return "-";
+    return (
+      <span className={`px-2 py-1 text-xs rounded-full font-medium ${getPercentileColor(Number(entry.weightPercentile))}`}>
+        {entry.weightPercentile}th
+      </span>
+    );
+  };
+  
+  const renderHeightPercentile = (entry: MeasurementEntry) => {
+    if (!entry.heightPercentile) return "-";
+    return (
+      <span className={`px-2 py-1 text-xs rounded-full font-medium ${getPercentileColor(Number(entry.heightPercentile))}`}>
+        {entry.heightPercentile}th
+      </span>
+    );
+  };
+  
+  const renderMeasurementType = (entry: MeasurementEntry) => {
+    const types = [];
+    
+    if (entry.weight) types.push(
+      <Tooltip key="weight">
+        <TooltipTrigger asChild>
+          <Scale className="h-4 w-4 text-primary mr-1" />
+        </TooltipTrigger>
+        <TooltipContent>
+          <p>Weight recorded</p>
+        </TooltipContent>
+      </Tooltip>
+    );
+    
+    if (entry.height) types.push(
+      <Tooltip key="height">
+        <TooltipTrigger asChild>
+          <Ruler className="h-4 w-4 text-secondary mr-1" />
+        </TooltipTrigger>
+        <TooltipContent>
+          <p>Height recorded</p>
+        </TooltipContent>
+      </Tooltip>
+    );
+    
+    if (entry.notes) types.push(
+      <Tooltip key="notes">
+        <TooltipTrigger asChild>
+          <FileText className="h-4 w-4 text-muted-foreground" />
+        </TooltipTrigger>
+        <TooltipContent>
+          <p>Has notes</p>
+        </TooltipContent>
+      </Tooltip>
+    );
+    
+    return (
+      <div className="flex items-center">{types}</div>
+    );
+  };
+  
+  // Filter entries based on active tab
+  const filteredEntries = entries.filter(entry => {
+    if (activeTab === "all") return true;
+    if (activeTab === "weight") return entry.weight !== null;
+    if (activeTab === "height") return entry.height !== null;
+    return true;
+  });
+
   return (
     <Card className="shadow-md">
-      <CardContent className="pt-6">
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-semibold text-primary">Measurement History</h2>
+      <CardHeader className="pb-3">
+        <div className="flex justify-between items-center">
+          <CardTitle className="text-xl font-semibold text-primary">Measurement History</CardTitle>
           <div className="text-sm text-muted-foreground">
             {entries.length} {entries.length === 1 ? 'entry' : 'entries'}
           </div>
         </div>
+      </CardHeader>
+      
+      <CardContent>
+        <Tabs defaultValue="all" value={activeTab} onValueChange={setActiveTab} className="mb-4">
+          <TabsList className="w-full grid grid-cols-3">
+            <TabsTrigger value="all">All</TabsTrigger>
+            <TabsTrigger value="weight">Weight</TabsTrigger>
+            <TabsTrigger value="height">Height</TabsTrigger>
+          </TabsList>
+        </Tabs>
         
-        {entries.length > 0 ? (
+        {filteredEntries.length > 0 ? (
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-border">
               <thead className="bg-muted/50">
                 <tr>
                   <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">Date</th>
                   <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">Age</th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">Weight</th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">Percentile</th>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">Type</th>
+                  
+                  {(activeTab === "all" || activeTab === "weight") && (
+                    <>
+                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">Weight</th>
+                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">Weight %</th>
+                    </>
+                  )}
+                  
+                  {(activeTab === "all" || activeTab === "height") && (
+                    <>
+                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">Height</th>
+                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">Height %</th>
+                    </>
+                  )}
+                  
                   <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">Actions</th>
                 </tr>
               </thead>
               <tbody className="bg-card divide-y divide-border">
-                {entries.map((entry) => {
+                {filteredEntries.map((entry) => {
                   const isBirthEntry = entry.date === baby.birthDate && Number(entry.ageMonths) === 0;
                   
                   return (
@@ -48,13 +158,31 @@ export function EntriesTable({ baby, entries, onEdit, onDelete }: EntriesTablePr
                         {formatAge(Number(entry.ageMonths))}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-foreground">
-                        {Number(entry.weight).toFixed(2)} kg
+                        {renderMeasurementType(entry)}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm">
-                        <span className={`px-2 py-1 text-xs rounded-full font-medium ${getPercentileColor(Number(entry.percentile))}`}>
-                          {entry.percentile}th
-                        </span>
-                      </td>
+                      
+                      {(activeTab === "all" || activeTab === "weight") && (
+                        <>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-foreground">
+                            {renderEntryWeight(entry)}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm">
+                            {renderWeightPercentile(entry)}
+                          </td>
+                        </>
+                      )}
+                      
+                      {(activeTab === "all" || activeTab === "height") && (
+                        <>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-foreground">
+                            {renderEntryHeight(entry)}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm">
+                            {renderHeightPercentile(entry)}
+                          </td>
+                        </>
+                      )}
+                      
                       <td className="px-6 py-4 whitespace-nowrap text-sm">
                         {isBirthEntry ? (
                           <span className="text-muted-foreground">(Birth)</span>
@@ -76,6 +204,24 @@ export function EntriesTable({ baby, entries, onEdit, onDelete }: EntriesTablePr
                             >
                               <Trash2 className="h-4 w-4" />
                             </Button>
+                            {entry.notes && (
+                              <TooltipProvider>
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <Button 
+                                      variant="ghost" 
+                                      size="icon" 
+                                      className="h-8 w-8"
+                                    >
+                                      <Info className="h-4 w-4" />
+                                    </Button>
+                                  </TooltipTrigger>
+                                  <TooltipContent className="max-w-xs">
+                                    <p className="text-xs">{entry.notes}</p>
+                                  </TooltipContent>
+                                </Tooltip>
+                              </TooltipProvider>
+                            )}
                           </div>
                         )}
                       </td>

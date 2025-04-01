@@ -15,12 +15,12 @@ import { babyFormSchema, BabyFormValues } from "@shared/schema";
 import { Button } from "@/components/ui/button";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useToast } from "@/hooks/use-toast";
-import { Baby, WeightEntry } from "@shared/schema";
+import { Baby } from "@shared/schema";
 import * as storageService from "@/services/storageService";
 import { calculatePercentile } from "@/lib/utils";
 
 interface BabyInfoFormProps {
-  onSubmit: (baby: Baby, birthWeightEntry: WeightEntry) => void;
+  onSubmit: (baby: Baby) => void;
 }
 
 export function BabyInfoForm({ onSubmit }: BabyInfoFormProps) {
@@ -54,7 +54,7 @@ export function BabyInfoForm({ onSubmit }: BabyInfoFormProps) {
       // Calculate and update percentile for the birth weight entry
       if (birthWeightEntry) {
         const percentile = calculatePercentile(0, Number(values.birthWeight), values.gender);
-        birthWeightEntry = storageService.updateWeightEntry(birthWeightEntry.id, {
+        storageService.updateWeightEntry(birthWeightEntry.id, {
           percentile: String(percentile)
         });
       }
@@ -64,8 +64,8 @@ export function BabyInfoForm({ onSubmit }: BabyInfoFormProps) {
         description: `${baby.name}'s information has been saved.`,
       });
       
-      // Pass the baby and birth weight entry to the parent component
-      onSubmit(baby, birthWeightEntry);
+      // Pass the baby to the parent component
+      onSubmit(baby);
     } catch (error) {
       console.error("Error creating baby:", error);
       toast({
