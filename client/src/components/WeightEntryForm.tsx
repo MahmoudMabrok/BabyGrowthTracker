@@ -83,7 +83,7 @@ export function WeightEntryForm({ baby, onEntryAdded }: WeightEntryFormProps) {
   return (
     <Card className="shadow-md">
       <CardContent className="pt-6">
-        <h2 className="text-xl font-semibold mb-4">Add New Measurement</h2>
+        <h2 className="text-xl font-semibold text-primary mb-4">Add New Measurement</h2>
         
         <Form {...form}>
           <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
@@ -97,6 +97,7 @@ export function WeightEntryForm({ baby, onEntryAdded }: WeightEntryFormProps) {
                     <Input 
                       type="date" 
                       {...field} 
+                      className="bg-background"
                     />
                   </FormControl>
                   <FormMessage />
@@ -120,6 +121,7 @@ export function WeightEntryForm({ baby, onEntryAdded }: WeightEntryFormProps) {
                       onChange={(e) => {
                         field.onChange(e.target.valueAsNumber);
                       }}
+                      className="bg-background"
                     />
                   </FormControl>
                   <FormMessage />
@@ -133,9 +135,9 @@ export function WeightEntryForm({ baby, onEntryAdded }: WeightEntryFormProps) {
                   <div className="flex items-center gap-1">
                     <FormLabel>Age</FormLabel>
                     <div className="relative group">
-                      <span className="cursor-help text-gray-400 text-sm">
+                      <span className="cursor-help text-muted-foreground text-sm">
                         ⓘ
-                        <div className="absolute bottom-full left-1/2 -translate-x-1/2 w-48 p-2 rounded bg-gray-800 text-white text-xs opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none mb-2 z-10">
+                        <div className="absolute bottom-full left-1/2 -translate-x-1/2 w-48 p-2 rounded bg-popover text-popover-foreground border border-border text-xs opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none mb-2 z-10">
                           Automatically calculated from birth date and measurement date
                         </div>
                       </span>
@@ -145,7 +147,7 @@ export function WeightEntryForm({ baby, onEntryAdded }: WeightEntryFormProps) {
                     <Input 
                       type="text" 
                       value={displayAge}
-                      className="bg-gray-100"
+                      className="bg-muted"
                       readOnly
                     />
                   </FormControl>
@@ -153,7 +155,7 @@ export function WeightEntryForm({ baby, onEntryAdded }: WeightEntryFormProps) {
               </div>
               <div className="w-1/3">
                 <Select disabled defaultValue="months">
-                  <SelectTrigger className="bg-gray-100">
+                  <SelectTrigger className="bg-muted">
                     <SelectValue placeholder="Unit" />
                   </SelectTrigger>
                   <SelectContent>
@@ -165,7 +167,7 @@ export function WeightEntryForm({ baby, onEntryAdded }: WeightEntryFormProps) {
             </div>
             
             <div className="mt-6 flex justify-end">
-              <Button type="submit">
+              <Button type="submit" className="bg-primary hover:bg-primary/90">
                 Add Measurement
               </Button>
             </div>

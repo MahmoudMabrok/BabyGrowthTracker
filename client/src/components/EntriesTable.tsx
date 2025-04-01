@@ -17,47 +17,47 @@ export function EntriesTable({ baby, entries, onEdit, onDelete }: EntriesTablePr
     <Card className="shadow-md">
       <CardContent className="pt-6">
         <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-semibold">Measurement History</h2>
-          <div className="text-sm text-gray-500">
+          <h2 className="text-xl font-semibold text-primary">Measurement History</h2>
+          <div className="text-sm text-muted-foreground">
             {entries.length} {entries.length === 1 ? 'entry' : 'entries'}
           </div>
         </div>
         
         {entries.length > 0 ? (
           <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
+            <table className="min-w-full divide-y divide-border">
+              <thead className="bg-muted/50">
                 <tr>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Age</th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Weight</th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Percentile</th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">Date</th>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">Age</th>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">Weight</th>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">Percentile</th>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">Actions</th>
                 </tr>
               </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
+              <tbody className="bg-card divide-y divide-border">
                 {entries.map((entry) => {
                   const isBirthEntry = entry.date === baby.birthDate && Number(entry.ageMonths) === 0;
                   
                   return (
                     <tr key={entry.id}>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-foreground">
                         {formatDate(entry.date)}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-foreground">
                         {formatAge(Number(entry.ageMonths))}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-foreground">
                         {Number(entry.weight).toFixed(2)} kg
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        <span className={`px-2 py-1 text-xs rounded-full ${getPercentileColor(Number(entry.percentile))}`}>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm">
+                        <span className={`px-2 py-1 text-xs rounded-full font-medium ${getPercentileColor(Number(entry.percentile))}`}>
                           {entry.percentile}th
                         </span>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm">
                         {isBirthEntry ? (
-                          <span className="text-gray-400">(Birth)</span>
+                          <span className="text-muted-foreground">(Birth)</span>
                         ) : (
                           <div className="flex space-x-2">
                             <Button 
@@ -87,13 +87,13 @@ export function EntriesTable({ baby, entries, onEdit, onDelete }: EntriesTablePr
           </div>
         ) : (
           <div className="py-12 text-center">
-            <div className="text-gray-400 mb-2">
+            <div className="text-muted-foreground mb-2">
               <svg xmlns="http://www.w3.org/2000/svg" className="mx-auto h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
               </svg>
             </div>
-            <p className="text-gray-500">No measurements recorded yet.</p>
-            <p className="text-gray-500 text-sm mt-1">Add your baby's first measurement above.</p>
+            <p className="text-muted-foreground">No measurements recorded yet.</p>
+            <p className="text-muted-foreground text-sm mt-1">Add your baby's first measurement above.</p>
           </div>
         )}
       </CardContent>

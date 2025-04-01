@@ -79,7 +79,7 @@ export function BabyInfoForm({ onSubmit }: BabyInfoFormProps) {
   return (
     <Card className="shadow-md">
       <CardContent className="pt-6">
-        <h2 className="text-xl font-semibold mb-4">Baby Information</h2>
+        <h2 className="text-2xl font-bold text-primary mb-6">Baby Information</h2>
         
         <Form {...form}>
           <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
@@ -94,6 +94,7 @@ export function BabyInfoForm({ onSubmit }: BabyInfoFormProps) {
                       <Input 
                         placeholder="Enter baby's name" 
                         {...field} 
+                        className="bg-background"
                       />
                     </FormControl>
                     <FormMessage />
@@ -111,6 +112,7 @@ export function BabyInfoForm({ onSubmit }: BabyInfoFormProps) {
                       <Input 
                         type="date" 
                         {...field} 
+                        className="bg-background"
                       />
                     </FormControl>
                     <FormMessage />
@@ -126,9 +128,9 @@ export function BabyInfoForm({ onSubmit }: BabyInfoFormProps) {
                     <div className="flex items-center gap-1">
                       <FormLabel>Birth Weight (kg)</FormLabel>
                       <div className="relative group">
-                        <span className="cursor-help text-gray-400 text-sm">
+                        <span className="cursor-help text-muted-foreground text-sm">
                           ⓘ
-                          <div className="absolute bottom-full left-1/2 -translate-x-1/2 w-48 p-2 rounded bg-gray-800 text-white text-xs opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none mb-2 z-10">
+                          <div className="absolute bottom-full left-1/2 -translate-x-1/2 w-48 p-2 rounded bg-popover text-popover-foreground border border-border text-xs opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none mb-2 z-10">
                             Enter weight in kilograms (e.g. 3.5)
                           </div>
                         </span>
@@ -145,6 +147,7 @@ export function BabyInfoForm({ onSubmit }: BabyInfoFormProps) {
                         onChange={(e) => {
                           field.onChange(e.target.valueAsNumber);
                         }}
+                        className="bg-background"
                       />
                     </FormControl>
                     <FormMessage />
@@ -166,11 +169,11 @@ export function BabyInfoForm({ onSubmit }: BabyInfoFormProps) {
                       >
                         <div className="flex items-center space-x-2">
                           <RadioGroupItem value="male" id="male" />
-                          <label htmlFor="male" className="text-sm text-gray-700">Boy</label>
+                          <label htmlFor="male" className="text-sm text-foreground">Boy</label>
                         </div>
                         <div className="flex items-center space-x-2">
                           <RadioGroupItem value="female" id="female" />
-                          <label htmlFor="female" className="text-sm text-gray-700">Girl</label>
+                          <label htmlFor="female" className="text-sm text-foreground">Girl</label>
                         </div>
                       </RadioGroup>
                     </FormControl>
@@ -181,7 +184,7 @@ export function BabyInfoForm({ onSubmit }: BabyInfoFormProps) {
             </div>
             
             <div className="flex justify-end">
-              <Button type="submit">
+              <Button type="submit" className="bg-primary hover:bg-primary/90">
                 Save Information
               </Button>
             </div>

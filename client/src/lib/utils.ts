@@ -80,11 +80,11 @@ export function getPercentileRange(percentile: number): string {
 
 // Get color based on percentile
 export function getPercentileColor(percentile: number): string {
-  if (percentile < 3) return "text-error bg-error/10";
-  if (percentile < 15) return "text-amber-500 bg-amber-50";
-  if (percentile < 85) return "text-success bg-success/10";
-  if (percentile < 97) return "text-amber-500 bg-amber-50";
-  return "text-error bg-error/10";
+  if (percentile < 3) return "text-destructive bg-destructive/10";
+  if (percentile < 15) return "text-amber-600 bg-amber-100";
+  if (percentile < 85) return "text-primary bg-primary/10";
+  if (percentile < 97) return "text-amber-600 bg-amber-100";
+  return "text-destructive bg-destructive/10";
 }
 
 // Get status text based on percentile

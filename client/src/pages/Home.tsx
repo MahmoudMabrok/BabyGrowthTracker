@@ -87,8 +87,8 @@ export default function Home() {
   };
   
   return (
-    <div className="min-h-screen bg-gray-50">
-      <header className="bg-white shadow-sm">
+    <div className="min-h-screen bg-background">
+      <header className="bg-card shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex justify-between items-center">
             <h1 className="text-2xl font-bold text-primary flex items-center">
@@ -126,9 +126,9 @@ export default function Home() {
         )}
       </main>
 
-      <footer className="bg-white border-t border-gray-200 py-6 mt-12">
+      <footer className="bg-card border-t border-border py-6 mt-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <p className="text-center text-sm text-gray-500">
+          <p className="text-center text-sm text-muted-foreground">
             Baby Growth Tracker uses WHO growth standards. This app is for informational purposes only and is not a substitute for professional medical advice.
           </p>
         </div>
