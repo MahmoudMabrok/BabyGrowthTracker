@@ -77,7 +77,7 @@ export function GrowthChart({ baby, entries }: GrowthChartProps) {
                 .map(entry => ({
                   x: Number(entry.ageMonths),
                   y: Number(entry.weight)
-                })),
+                })) as any, // Type assertion needed for Chart.js
               borderColor: "hsl(var(--primary))",
               backgroundColor: "hsl(var(--primary))",
               borderWidth: 2,
@@ -168,7 +168,7 @@ export function GrowthChart({ baby, entries }: GrowthChartProps) {
                 .map(entry => ({
                   x: Number(entry.ageMonths),
                   y: Number(entry.height)
-                })),
+                })) as any, // Type assertion needed for Chart.js
               borderColor: "hsl(var(--secondary))",
               backgroundColor: "hsl(var(--secondary))",
               borderWidth: 2,
@@ -246,7 +246,7 @@ export function GrowthChart({ baby, entries }: GrowthChartProps) {
           datasets: [
             {
               label: `${percentileType.charAt(0).toUpperCase() + percentileType.slice(1)} Percentile`,
-              data: percentileData,
+              data: percentileData as any,
               borderColor: chartColor,
               backgroundColor: chartColor,
               borderWidth: 2,

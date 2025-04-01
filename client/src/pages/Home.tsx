@@ -5,6 +5,7 @@ import { WeightEntryForm } from "@/components/WeightEntryForm";
 import { EntriesTable } from "@/components/EntriesTable";
 import { EditEntryModal } from "@/components/EditEntryModal";
 import { GrowthSummary } from "@/components/GrowthSummary";
+import { Milestones } from "@/components/Milestones";
 import { BabySelector } from "@/components/BabySelector";
 import { Baby, MeasurementEntry } from "@shared/schema";
 import { useToast } from "@/hooks/use-toast";
@@ -242,6 +243,10 @@ export default function Home() {
             </div>
             
             <GrowthSummary baby={activeBaby} entries={entries} />
+            
+            <div className="mt-8">
+              <Milestones baby={activeBaby} entries={entries} />
+            </div>
           </div>
         )}
       </main>
