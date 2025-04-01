@@ -54,36 +54,42 @@ export function EntriesTable({ baby, entries, onEdit, onDelete }: EntriesTablePr
     const types = [];
     
     if (entry.weight) types.push(
-      <Tooltip key="weight">
-        <TooltipTrigger asChild>
-          <Scale className="h-4 w-4 text-primary mr-1" />
-        </TooltipTrigger>
-        <TooltipContent>
-          <p>Weight recorded</p>
-        </TooltipContent>
-      </Tooltip>
+      <TooltipProvider key="weight-provider">
+        <Tooltip key="weight">
+          <TooltipTrigger asChild>
+            <Scale className="h-4 w-4 text-primary mr-1" />
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>Weight recorded</p>
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
     );
     
     if (entry.height) types.push(
-      <Tooltip key="height">
-        <TooltipTrigger asChild>
-          <Ruler className="h-4 w-4 text-secondary mr-1" />
-        </TooltipTrigger>
-        <TooltipContent>
-          <p>Height recorded</p>
-        </TooltipContent>
-      </Tooltip>
+      <TooltipProvider key="height-provider">
+        <Tooltip key="height">
+          <TooltipTrigger asChild>
+            <Ruler className="h-4 w-4 text-secondary mr-1" />
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>Height recorded</p>
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
     );
     
     if (entry.notes) types.push(
-      <Tooltip key="notes">
-        <TooltipTrigger asChild>
-          <FileText className="h-4 w-4 text-muted-foreground" />
-        </TooltipTrigger>
-        <TooltipContent>
-          <p>Has notes</p>
-        </TooltipContent>
-      </Tooltip>
+      <TooltipProvider key="notes-provider">
+        <Tooltip key="notes">
+          <TooltipTrigger asChild>
+            <FileText className="h-4 w-4 text-muted-foreground" />
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>Has notes</p>
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
     );
     
     return (
