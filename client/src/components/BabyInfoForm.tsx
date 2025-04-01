@@ -25,7 +25,7 @@ interface BabyInfoFormProps {
 
 export function BabyInfoForm({ onSubmit }: BabyInfoFormProps) {
   const { toast } = useToast();
-  
+
   const form = useForm<BabyFormValues>({
     resolver: zodResolver(babyFormSchema),
     defaultValues: {
@@ -43,14 +43,14 @@ export function BabyInfoForm({ onSubmit }: BabyInfoFormProps) {
         ...values,
         birthWeight: String(values.birthWeight)
       };
-      
+
       // Create the baby in local storage
       const baby = storageService.createBaby(babyData);
-      
+
       // Get the birth weight entry
       const entries = storageService.getWeightEntriesByBabyId(baby.id);
       let birthWeightEntry = entries[0];
-      
+
       // Calculate and update percentile for the birth weight entry
       if (birthWeightEntry) {
         const percentile = calculatePercentile(0, Number(values.birthWeight), values.gender);
@@ -58,14 +58,15 @@ export function BabyInfoForm({ onSubmit }: BabyInfoFormProps) {
           percentile: String(percentile)
         });
       }
-      
+
       toast({
         title: "Baby information saved",
         description: `${baby.name}'s information has been saved.`,
       });
-      
+
       // Pass the baby to the parent component
       onSubmit(baby);
+      window.location.href = "/"; // Redirect to home page
     } catch (error) {
       console.error("Error creating baby:", error);
       toast({
@@ -80,7 +81,7 @@ export function BabyInfoForm({ onSubmit }: BabyInfoFormProps) {
     <Card className="shadow-md">
       <CardContent className="pt-6">
         <h2 className="text-2xl font-bold text-primary mb-6">Baby Information</h2>
-        
+
         <Form {...form}>
           <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -101,7 +102,7 @@ export function BabyInfoForm({ onSubmit }: BabyInfoFormProps) {
                   </FormItem>
                 )}
               />
-              
+
               <FormField
                 control={form.control}
                 name="birthDate"
@@ -119,7 +120,7 @@ export function BabyInfoForm({ onSubmit }: BabyInfoFormProps) {
                   </FormItem>
                 )}
               />
-              
+
               <FormField
                 control={form.control}
                 name="birthWeight"
@@ -154,7 +155,7 @@ export function BabyInfoForm({ onSubmit }: BabyInfoFormProps) {
                   </FormItem>
                 )}
               />
-              
+
               <FormField
                 control={form.control}
                 name="gender"
@@ -182,7 +183,7 @@ export function BabyInfoForm({ onSubmit }: BabyInfoFormProps) {
                 )}
               />
             </div>
-            
+
             <div className="flex justify-end">
               <Button type="submit" className="bg-primary hover:bg-primary/90">
                 Save Information
